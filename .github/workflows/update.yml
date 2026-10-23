@@ -1,4 +1,4 @@
-name: Update Daylight cask
+name: Update app casks
 on:
   schedule:
     - cron: '23 */6 * * *'
@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: update-daylight
+  group: update-casks
   cancel-in-progress: false
 jobs:
   update:
@@ -15,20 +15,26 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
-      - name: Verify latest release and update cask
+      - name: Test updater safeguards
+        run: python3 -m unittest discover -s tests
+      - name: Verify latest releases and update casks
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/update-cask.py
+        run: |
+          python3 scripts/update-cask.py daylight
+          python3 scripts/update-cask.py crypta
       - name: Check Ruby syntax
-        run: ruby -c Casks/daylight.rb
+        run: |
+          ruby -c Casks/daylight.rb
+          ruby -c Casks/crypta.rb
       - name: Publish verified update
         run: |
-          if git diff --quiet -- Casks/daylight.rb; then
-            echo "Daylight is already up to date."
+          if git diff --quiet -- Casks/daylight.rb Casks/crypta.rb; then
+            echo "Casks are already up to date."
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add Casks/daylight.rb
-          git commit -m 'Update Daylight to latest verified release'
+          git add Casks/daylight.rb Casks/crypta.rb
+          git commit -m 'Update casks to latest verified releases'
           git push
