@@ -1,0 +1,34 @@
+name: Update Daylight cask
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: update-daylight
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify latest release and update cask
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/update-cask.py
+      - name: Check Ruby syntax
+        run: ruby -c Casks/daylight.rb
+      - name: Publish verified update
+        run: |
+          if git diff --quiet -- Casks/daylight.rb; then
+            echo "Daylight is already up to date."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Casks/daylight.rb
+          git commit -m 'Update Daylight to latest verified release'
+          git push
