@@ -2,7 +2,7 @@
 
 cask "crypta" do
   version "0.5.0"
-  sha256 "b384c65a24913ee297c4b30f96197c8d2f20c9892f035dda7b0e743ebfb826c2"
+  sha256 "772fff2153657fcbdebd6039d8b313fdb03b5e8e3c4921d773ac3c5d6a5c46d7"
 
   url "https://github.com/jplonghi/Crypta/releases/download/v#{version}/Crypta-macOS-arm64.dmg"
   name "Crypta"
